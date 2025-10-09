@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import model.Cliente;
+import util.OutputFormatter;
 
 public class MenuClientes {
     private ClienteDAO clienteDAO;
@@ -69,7 +70,7 @@ public class MenuClientes {
         try {
             Cliente cliente = clienteDAO.buscarCliente(id);
             if (cliente != null) {
-                System.out.println(cliente);
+                System.out.println(OutputFormatter.formatCliente(cliente));
             } else {
                 System.out.println("Cliente não encontrado.");
             }
@@ -95,6 +96,7 @@ public class MenuClientes {
             Cliente cliente = new Cliente(nome, email, senha, cadastro);
             if (clienteDAO.incluirCliente(cliente)) {
                 System.out.println("Cliente incluído com sucesso.");
+                System.out.println(OutputFormatter.formatCliente(cliente));
             } else {
                 System.out.println("Erro ao incluir cliente.");
             }
@@ -146,6 +148,7 @@ public class MenuClientes {
 
             if (clienteDAO.alterarCliente(cliente)) {
                 System.out.println("Cliente alterado com sucesso.");
+                System.out.println(OutputFormatter.formatCliente(cliente));
             } else {
                 System.out.println("Erro ao alterar cliente.");
             }

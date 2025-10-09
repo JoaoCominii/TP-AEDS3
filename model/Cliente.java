@@ -66,10 +66,6 @@ public class Cliente implements Registro{
     public String toString() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String cadastroStr = (this.cadastro == null) ? "" : this.cadastro.format(fmt);
-        return "\nID........: " + this.id +
-               "\nNome......: " + this.nome +
-               "\nEmail.....: " + this.email +
-               "\nSenha.....: " + this.senha +
-               "\nCadastro..: " + cadastroStr;
+        return "ID: " + this.id + " | Nome: " + this.nome + " | Email: " + this.email + " | Senha: " + this.senha + " | Cadastro: " + cadastroStr;
     }
 }

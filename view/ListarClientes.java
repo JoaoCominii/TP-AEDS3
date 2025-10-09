@@ -3,6 +3,7 @@ package view;
 import java.io.File;
 import java.io.RandomAccessFile;
 import model.Cliente;
+import util.OutputFormatter;
 
 public class ListarClientes {
     public static void main(String[] args) throws Exception {
@@ -24,7 +25,7 @@ public class ListarClientes {
             }
 
             arquivo.seek(TAM_CABECALHO);
-            System.out.println("ID\tNome\tEmail\tCadastro");
+            System.out.println("Listagem de clientes:");
 
             while (arquivo.getFilePointer() < arquivo.length()) {
                 // leia lápide e tamanho com segurança
@@ -50,11 +51,8 @@ public class ListarClientes {
                 if (lapide == ' ') {
                     Cliente c = new Cliente();
                     c.fromByteArray(dados);
-                    // formata data como dd-MM-yyyy
-                    java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                    String cad = (c.getCadastro() == null) ? "" : c.getCadastro().format(fmt);
-                    System.out.printf("%d\t%s\t%s\t%s%n",
-                        c.getId(), c.getNome(), c.getEmail(), cad);
+                    // imprime usando OutputFormatter
+                    System.out.println(util.OutputFormatter.formatCliente(c));
                 }
             }
         } finally {
