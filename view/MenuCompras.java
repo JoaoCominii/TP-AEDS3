@@ -55,12 +55,14 @@ public class MenuCompras {
     private void incluir() {
         try {
             System.out.println("\nInclusão de compra");
+            System.out.print("Cliente ID (vazio para nenhum): "); int clienteId = -1; String cid = console.nextLine(); if (!cid.isEmpty()) { try { clienteId = Integer.parseInt(cid); } catch (Exception ex) { clienteId = -1; } }
             System.out.print("Status: "); String status = console.nextLine();
             System.out.print("Valor: "); double valor = 0.0; try { valor = Double.parseDouble(console.nextLine()); } catch (Exception ex) { valor = 0.0; }
             LocalDate data = LocalDate.now();
             Compra c = new Compra(status, valor);
             c.setData(data);
-            if (compraDAO.incluir(c)) System.out.println("Compra incluída com sucesso."); else System.out.println("Erro ao incluir compra.");
+            c.setClienteId(clienteId);
+            if (compraDAO.incluirComValidacao(c)) System.out.println("Compra incluída com sucesso."); else System.out.println("Erro ao incluir compra.");
         } catch (Exception e) { System.out.println("Erro ao incluir compra."); e.printStackTrace(); }
     }
 
@@ -72,8 +74,9 @@ public class MenuCompras {
             if (c == null) { System.out.println("Compra não encontrada."); return; }
             System.out.print("Novo status (vazio para manter): "); String status = console.nextLine(); if (!status.isEmpty()) c.setStatus(status);
             System.out.print("Novo valor (vazio para manter): "); String vs = console.nextLine(); if (!vs.isEmpty()) { try { c.setValor(Double.parseDouble(vs)); } catch (Exception ex) {} }
+            System.out.print("Cliente ID (vazio para manter): "); String cid = console.nextLine(); if (!cid.isEmpty()) { try { c.setClienteId(Integer.parseInt(cid)); } catch (Exception ex) {} }
             System.out.print("Nova data (DD/MM/AAAA - vazio para hoje): "); String ds = console.nextLine(); if (!ds.isEmpty()) { try { c.setData(LocalDate.parse(ds, java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))); } catch (Exception ex) { System.out.println("Data inválida. Mantendo atual."); } } else { c.setData(LocalDate.now()); }
-            if (compraDAO.alterar(c)) System.out.println("Compra alterada com sucesso."); else System.out.println("Erro ao alterar compra.");
+            if (compraDAO.alterarComValidacao(c)) System.out.println("Compra alterada com sucesso."); else System.out.println("Erro ao alterar compra.");
         } catch (Exception e) { System.out.println("Erro ao alterar compra."); e.printStackTrace(); }
     }
 

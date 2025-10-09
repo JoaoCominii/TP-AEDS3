@@ -78,6 +78,7 @@ public class MenuBiblioteca {
 
     private void incluirBiblioteca() {
         System.out.println("\nInclusão de biblioteca");
+        System.out.print("Cliente ID (vazio para nenhum): "); int clienteId = -1; String cidLine = console.nextLine(); if (!cidLine.isEmpty()) { try { clienteId = Integer.parseInt(cidLine); } catch (Exception ex) { clienteId = -1; } }
         System.out.print("Nome: ");
         String nome = console.nextLine();
         System.out.print("Descrição: ");
@@ -87,7 +88,8 @@ public class MenuBiblioteca {
 
         try {
             Biblioteca b = new Biblioteca(nome, descricao, status);
-            if (bibliotecaDAO.incluir(b)) System.out.println("Biblioteca incluída com sucesso.");
+            b.setClienteId(clienteId);
+            if (bibliotecaDAO.incluirComValidacao(b)) System.out.println("Biblioteca incluída com sucesso.");
             else System.out.println("Erro ao incluir biblioteca.");
         } catch (Exception e) {
             System.out.println("Erro ao incluir biblioteca.");
@@ -120,11 +122,12 @@ public class MenuBiblioteca {
             String descricao = console.nextLine();
             if (!descricao.isEmpty()) b.setDescricao(descricao);
 
+            System.out.print("Cliente ID (vazio para manter): "); String cid = console.nextLine(); if (!cid.isEmpty()) { try { b.setClienteId(Integer.parseInt(cid)); } catch (Exception ex) {} }
             System.out.print("Novo status (vazio para manter): ");
             String status = console.nextLine();
             if (!status.isEmpty()) b.setStatus(status);
 
-            if (bibliotecaDAO.alterar(b)) System.out.println("Biblioteca alterada com sucesso.");
+            if (bibliotecaDAO.alterarComValidacao(b)) System.out.println("Biblioteca alterada com sucesso.");
             else System.out.println("Erro ao alterar biblioteca.");
         } catch (Exception e) {
             System.out.println("Erro ao alterar biblioteca.");
