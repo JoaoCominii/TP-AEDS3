@@ -1,3 +1,8 @@
+package teste;
+
+import dao.ClienteDAO;
+import model.Cliente;
+
 public class TestBuscar {
     public static void main(String[] args) {
         try {

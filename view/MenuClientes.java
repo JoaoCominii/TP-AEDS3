@@ -1,12 +1,16 @@
+package view;
+
+import dao.ClienteDAO;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import model.Cliente;
 
 public class MenuClientes {
     private ClienteDAO clienteDAO;
     private Scanner console;
 
-    // Recebe o Scanner do Principal para evitar múltiplos scanners no System.in
+    // Recebe o Scanner do Principal para evitar multiplos scanners no System.in
     public MenuClientes(Scanner console) throws Exception {
         this.console = console;
         clienteDAO = new ClienteDAO();

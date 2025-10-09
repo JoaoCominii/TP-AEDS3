@@ -1,5 +1,8 @@
+package view;
+
 import java.io.File;
 import java.io.RandomAccessFile;
+import model.Cliente;
 
 public class ListarClientes {
     public static void main(String[] args) throws Exception {

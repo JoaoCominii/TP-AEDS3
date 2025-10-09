@@ -1,5 +1,7 @@
-import java.time.LocalDate;
+package model;
+
 import java.io.*;
+import java.time.LocalDate;
 
 public class Cliente implements Registro{
     private int id;
@@ -35,7 +37,7 @@ public class Cliente implements Registro{
     public void setSalario(float salario) { this.salario = salario; }
     public LocalDate getNascimento() { return nascimento; }
     public void setNascimento(LocalDate nascimento) { this.nascimento = nascimento; }
- // Implementação do método toByteArray()
+ // Implementa��o do m�todo toByteArray()
  public byte[] toByteArray() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(baos);
@@ -47,7 +49,7 @@ public class Cliente implements Registro{
     return baos.toByteArray();
 }
 
-// Implementação do método fromByteArray()
+// Implementa��o do m�todo fromByteArray()
 public void fromByteArray(byte[] b) throws IOException {
     ByteArrayInputStream bais = new ByteArrayInputStream(b);
     DataInputStream dis = new DataInputStream(bais);
@@ -62,7 +64,7 @@ public void fromByteArray(byte[] b) throws IOException {
         return "\nID........: " + this.id +
                "\nNome......: " + this.nome +
                "\nCPF.......: " + this.cpf +
-               "\nSalário...: " + this.salario +
+               "\nSal�rio...: " + this.salario +
                "\nNascimento: " + this.nascimento;
     }
 }
