@@ -59,10 +59,10 @@ Desenvolver um sistema que:
 - **Administrador:** Gerencia cadastros, compras e jogos.
 
 ## Diagrama de Caso de Uso
-![Diagrama de Caso de Uso](CasosDeUso.jpg)
+![Diagrama de Caso de Uso](img/CasosDeUso.jpg)
 
 ## Diagrama Entidade-Relacionamento
-![DER](DER.jpg)
+![DER](img/DER.jpg)
 
 ## Arquitetura Proposta
 
@@ -73,4 +73,4 @@ O sistema seguirá o padrão **MVC + DAO**, onde:
 - **View:** Interface gráfica para interação com o usuário (HTML/CSS).
 
 ## Diagrama de Arquitetura em Camadas
-![Diagrama de Arquitetura em Camadas](Arquitetura.jpg)
+![Diagrama de Arquitetura em Camadas](img/Arquitetura.jpg)

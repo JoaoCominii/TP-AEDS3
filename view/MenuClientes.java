@@ -27,6 +27,7 @@ public class MenuClientes {
             System.out.println("2 - Incluir");
             System.out.println("3 - Alterar");
             System.out.println("4 - Excluir");
+            System.out.println("5 - Listar");
             System.out.println("0 - Voltar");
 
             System.out.print("\nOpção: ");
@@ -48,6 +49,9 @@ public class MenuClientes {
                     break;
                 case 4:
                     excluirCliente();
+                    break;
+                case 5:
+                    listar();
                     break;
                 case 0:
                     break;
@@ -187,6 +191,23 @@ public class MenuClientes {
             }
         } catch (Exception e) {
             System.out.println("Erro ao excluir cliente.");
+            e.printStackTrace();
+        }
+    }
+
+    private void listar() {
+        try {
+            System.out.println("Listagem de clientes:");
+            for (int id = 1; id <= 1000; id++) {
+                try {
+                    model.Cliente c = clienteDAO.buscarCliente(id);
+                    if (c != null) System.out.println(OutputFormatter.formatCliente(c));
+                } catch (Exception e) {
+                    // ignora id inexistente
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar clientes.");
             e.printStackTrace();
         }
     }

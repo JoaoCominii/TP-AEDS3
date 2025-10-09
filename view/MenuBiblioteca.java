@@ -23,6 +23,7 @@ public class MenuBiblioteca {
             System.out.println("2 - Incluir");
             System.out.println("3 - Alterar");
             System.out.println("4 - Excluir");
+            System.out.println("5 - Listar");
             System.out.println("0 - Voltar");
 
             System.out.print("\nOpção: ");
@@ -44,6 +45,9 @@ public class MenuBiblioteca {
                     break;
                 case 4:
                     excluirBiblioteca();
+                    break;
+                case 5:
+                    listarBibliotecas();
                     break;
                 case 0:
                     break;
@@ -152,6 +156,23 @@ public class MenuBiblioteca {
             }
         } catch (Exception e) {
             System.out.println("Erro ao excluir biblioteca.");
+            e.printStackTrace();
+        }
+    }
+
+    private void listarBibliotecas() {
+        try {
+            System.out.println("Listagem de bibliotecas:");
+            for (int id = 1; id <= 1000; id++) {
+                try {
+                    model.Biblioteca b = bibliotecaDAO.buscar(id);
+                    if (b != null) System.out.println(OutputFormatter.formatBiblioteca(b));
+                } catch (Exception e) {
+                    // ignora ids inexistentes
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar bibliotecas.");
             e.printStackTrace();
         }
     }
