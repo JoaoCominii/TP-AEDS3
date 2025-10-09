@@ -19,7 +19,7 @@ b) Como atributos multivalorados do tipo string foram tratados?
 
 c) Como foi implementada a exclusão lógica?
 
-- Cada registro tem uma "lápide" (tombstone) no arquivo: um byte imediatamente antes do tamanho. Valores usados:
+- Cada registro tem uma "lápide" no arquivo: um byte imediatamente antes do tamanho. Valores usados:
 	- ' ' (espaço) = registro ativo
 	- '*' = registro excluído
 - Ao excluir um registro, o código altera a lápide para '*' e adiciona o espaço à free-list (uma lista encadeada de blocos livres armazenada dentro do próprio arquivo). A implementação fica em `dao.Arquivo`:
@@ -46,8 +46,6 @@ h) Como está estruturado o projeto no GitHub (pastas, módulos, arquitetura)?
 	- Convenções: data formatada como `dd-MM-yyyy`, preços com duas casas decimais, `nota` dos jogos limitada a 0–5 pelo modelo.
 
 ---
-
-Se quiser, eu aplico pequenas melhorias na documentação (ex.: desenho binário com offsets em bytes, exemplo de migrador para atualizar DBs antigos, ou um README ampliado com os comandos de compilação/testes). Qual prefere em seguida?
 
 ## Diagrama de bytes (layout do arquivo .db)
 
@@ -151,7 +149,3 @@ O que aparece e o que fazer:
 - Dicas:
 	- Em operações de alteração, deixar o campo vazio (apertar Enter) normalmente mantém o valor atual.
 	- Veja mensagens de sucesso/erro exibidas no console após cada operação.
-	- Para testar de forma determinística, limpe os DBs (`Remove-Item -Recurse -Force .\dados\*`) e use `teste.SeedData` para criar um cliente seed antes de abrir o `Principal`.
-
-Se quiser, posso adicionar exemplos de execução (fluxo com entradas e saídas do console) ou melhorar os menus para prompts mais claros.
-
