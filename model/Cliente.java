@@ -2,28 +2,29 @@ package model;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Cliente implements Registro{
     private int id;
     private String nome;
-    private String cpf;
-    private float salario;
-    private LocalDate nascimento;
+    private String email;
+    private String senha;
+    private LocalDate cadastro;
 
     public Cliente() {
-        this(-1, "", "", 0F, LocalDate.now());
+        this(-1, "", "", "", LocalDate.now());
     }
 
-    public Cliente(String n, String c, float s, LocalDate d) {
-        this(-1, n, c, s, d);
+    public Cliente(String n, String e, String s, LocalDate d) {
+        this(-1, n, e, s, d);
     }
 
-    public Cliente(int i, String n, String c, float s, LocalDate d) {
+    public Cliente(int i, String n, String e, String s, LocalDate d) {
         this.id = i;
         this.nome = n;
-        this.cpf = c;
-        this.salario = s;
-        this.nascimento = d;
+        this.email = e;
+        this.senha = s;
+        this.cadastro = d;
     }
 
     // Getters e Setters
@@ -31,40 +32,44 @@ public class Cliente implements Registro{
     public void setId(int id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-    public float getSalario() { return salario; }
-    public void setSalario(float salario) { this.salario = salario; }
-    public LocalDate getNascimento() { return nascimento; }
-    public void setNascimento(LocalDate nascimento) { this.nascimento = nascimento; }
- // Implementa��o do m�todo toByteArray()
- public byte[] toByteArray() throws IOException {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    DataOutputStream dos = new DataOutputStream(baos);
-    dos.writeInt(this.id);
-    dos.writeUTF(this.nome);
-    dos.writeUTF(this.cpf);
-    dos.writeFloat(this.salario);
-    dos.writeLong(this.nascimento.toEpochDay());
-    return baos.toByteArray();
-}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+    public LocalDate getCadastro() { return cadastro; }
+    public void setCadastro(LocalDate cadastro) { this.cadastro = cadastro; }
 
-// Implementa��o do m�todo fromByteArray()
-public void fromByteArray(byte[] b) throws IOException {
-    ByteArrayInputStream bais = new ByteArrayInputStream(b);
-    DataInputStream dis = new DataInputStream(bais);
-    this.id = dis.readInt();
-    this.nome = dis.readUTF();
-    this.cpf = dis.readUTF();
-    this.salario = dis.readFloat();
-    this.nascimento = LocalDate.ofEpochDay(dis.readLong());
-}
+    // Implementação do método toByteArray()
+    public byte[] toByteArray() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeInt(this.id);
+        dos.writeUTF(this.nome);
+        dos.writeUTF(this.email);
+        dos.writeUTF(this.senha);
+        dos.writeLong(this.cadastro.toEpochDay());
+        return baos.toByteArray();
+    }
+
+    // Implementação do método fromByteArray()
+    public void fromByteArray(byte[] b) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(b);
+        DataInputStream dis = new DataInputStream(bais);
+        this.id = dis.readInt();
+        this.nome = dis.readUTF();
+        this.email = dis.readUTF();
+        this.senha = dis.readUTF();
+        this.cadastro = LocalDate.ofEpochDay(dis.readLong());
+    }
+
     @Override
     public String toString() {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String cadastroStr = (this.cadastro == null) ? "" : this.cadastro.format(fmt);
         return "\nID........: " + this.id +
                "\nNome......: " + this.nome +
-               "\nCPF.......: " + this.cpf +
-               "\nSal�rio...: " + this.salario +
-               "\nNascimento: " + this.nascimento;
+               "\nEmail.....: " + this.email +
+               "\nSenha.....: " + this.senha +
+               "\nCadastro..: " + cadastroStr;
     }
 }

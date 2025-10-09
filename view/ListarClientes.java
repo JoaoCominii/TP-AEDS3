@@ -24,7 +24,7 @@ public class ListarClientes {
             }
 
             arquivo.seek(TAM_CABECALHO);
-            System.out.println("ID\tNome\tCPF\tSalario\tNascimento");
+            System.out.println("ID\tNome\tEmail\tCadastro");
 
             while (arquivo.getFilePointer() < arquivo.length()) {
                 // leia lápide e tamanho com segurança
@@ -50,8 +50,11 @@ public class ListarClientes {
                 if (lapide == ' ') {
                     Cliente c = new Cliente();
                     c.fromByteArray(dados);
-                    System.out.printf("%d\t%s\t%s\t%.2f\t%s%n",
-                        c.getId(), c.getNome(), c.getCpf(), c.getSalario(), c.getNascimento().toString());
+                    // formata data como dd-MM-yyyy
+                    java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    String cad = (c.getCadastro() == null) ? "" : c.getCadastro().format(fmt);
+                    System.out.printf("%d\t%s\t%s\t%s%n",
+                        c.getId(), c.getNome(), c.getEmail(), cad);
                 }
             }
         } finally {

@@ -84,28 +84,15 @@ public class MenuClientes {
 
         System.out.print("\nNome: ");
         String nome = console.nextLine();
-        System.out.print("CPF (11 dígitos): ");
-        String cpf = console.nextLine();
-        System.out.print("Salário: ");
-        float salario;
-        try {
-            salario = Float.parseFloat(console.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Salário inválido.");
-            return;
-        }
-        System.out.print("Data de nascimento (DD/MM/AAAA): ");
-        String dataStr = console.nextLine();
-        LocalDate nascimento;
-        try {
-            nascimento = LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception e) {
-            System.out.println("Data inválida.");
-            return;
-        }
+        System.out.print("Email: ");
+        String email = console.nextLine();
+        System.out.print("Senha: ");
+        String senha = console.nextLine();
+        // captura a data de cadastro automaticamente como hoje
+        LocalDate cadastro = LocalDate.now();
 
         try {
-            Cliente cliente = new Cliente(nome, cpf, salario, nascimento);
+            Cliente cliente = new Cliente(nome, email, senha, cadastro);
             if (clienteDAO.incluirCliente(cliente)) {
                 System.out.println("Cliente incluído com sucesso.");
             } else {
@@ -138,26 +125,19 @@ public class MenuClientes {
             String nome = console.nextLine();
             if (!nome.isEmpty()) cliente.setNome(nome);
 
-            System.out.print("Novo CPF (vazio para manter): ");
-            String cpf = console.nextLine();
-            if (!cpf.isEmpty()) cliente.setCpf(cpf);
+            System.out.print("Novo email (vazio para manter): ");
+            String email = console.nextLine();
+            if (!email.isEmpty()) cliente.setEmail(email);
 
-            System.out.print("Novo salário (vazio para manter): ");
-            String salarioStr = console.nextLine();
-            if (!salarioStr.isEmpty()) {
-                try {
-                    cliente.setSalario(Float.parseFloat(salarioStr));
-                } catch (NumberFormatException ex) {
-                    System.out.println("Salário inválido. Alteração cancelada.");
-                    return;
-                }
-            }
+            System.out.print("Nova senha (vazio para manter): ");
+            String senha = console.nextLine();
+            if (!senha.isEmpty()) cliente.setSenha(senha);
 
-            System.out.print("Nova data de nascimento (DD/MM/AAAA, vazio para manter): ");
+            System.out.print("Nova data de cadastro (DD/MM/AAAA, vazio para manter): ");
             String dataStr = console.nextLine();
             if (!dataStr.isEmpty()) {
                 try {
-                    cliente.setNascimento(LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    cliente.setCadastro(LocalDate.parse(dataStr, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 } catch (Exception ex) {
                     System.out.println("Data inválida. Alteração cancelada.");
                     return;
