@@ -3,6 +3,7 @@ package util;
 import java.time.format.DateTimeFormatter;
 import model.Biblioteca;
 import model.Cliente;
+import model.Compra;
 import model.Jogo;
 
 public class OutputFormatter {
@@ -24,5 +25,13 @@ public class OutputFormatter {
         String gens = String.join(",", j.getGeneros() == null ? new java.util.ArrayList<>() : j.getGeneros());
         String precoStr = String.format("%.2f", j.getPreco());
         return "ID: " + j.getId() + " | Nome: " + j.getNome() + " | Descricao: " + j.getDescricao() + " | Tamanho: " + j.getTamanho() + " | Nota: " + j.getNota() + " | Plataforma: " + j.getPlataforma() + " | Preco: " + precoStr + " | Generos: " + gens + " | Classificacao: " + j.getClassificacaoEtaria();
+    }
+
+    public static String formatCompra(Compra c) {
+        if (c == null) return "";
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String data = (c.getData() == null) ? "" : c.getData().format(fmt);
+        String valor = String.format("%.2f", c.getValor());
+        return "ID: " + c.getId() + " | Status: " + c.getStatus() + " | Valor: " + valor + " | Data: " + data;
     }
 }

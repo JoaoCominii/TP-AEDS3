@@ -15,6 +15,7 @@ public class Principal {
                 System.out.println("\n1 - Clientes");
                 System.out.println("2 - Bibliotecas");
                 System.out.println("3 - Jogos");
+                System.out.println("4 - Compras");
                 System.out.println("0 - Sair");
 
                 System.out.print("\nOpção: ");
@@ -36,6 +37,10 @@ public class Principal {
                     case 3:
                         MenuJogos menuJogos = new MenuJogos(console);
                         menuJogos.menu();
+                        break;
+                    case 4:
+                        MenuCompras menuCompras = new MenuCompras(console);
+                        menuCompras.menu();
                         break;
                     case 0:
                         System.out.println("Saindo...");
