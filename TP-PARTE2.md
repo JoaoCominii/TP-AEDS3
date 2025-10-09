@@ -117,6 +117,41 @@ java -cp . teste.TestCompra
 ```
 
 Notas:
-- Os arquivos de dados ficam em `dados/<entidade>/<entidade>.db`. Recomendamos adicionar `dados/` ao `.gitignore`.
+- Os arquivos de dados ficam em `dados/<entidade>/<entidade>.db`. 
 - Mudanças no layout binário podem quebrar compatibilidade; o projeto inclui fallbacks em alguns `fromByteArray` para manter compatibilidade com registros antigos.
+
+## Executando a interface principal (view.Principal)
+
+Após compilar o projeto, você pode iniciar a interface de console principal que agrega todos os menus (clientes, bibliotecas, jogos, compras):
+
+```powershell
+# a partir da raiz do projeto
+java -cp . view.Principal
+```
+
+O que aparece e o que fazer:
+
+- Menu principal (opções):
+	1 - Clientes
+	2 - Bibliotecas
+	3 - Jogos
+	4 - Compras
+	0 - Sair
+
+- Como navegar:
+	- Digite o número da opção e pressione Enter.
+	- Em cada sub-menu use as opções mostradas (Buscar, Incluir, Alterar, Excluir, Listar). Normalmente 0 volta ao menu anterior.
+
+- Fluxo de uso recomendado (exemplo prático):
+	1) Clientes → Incluir: crie um cliente para obter um `clienteId` válido (necessário para associar bibliotecas e compras).
+	2) Jogos → Incluir: cadastre jogos que poderão ser adicionados a compras/bibliotecas.
+	3) Compras → Incluir: informe o `clienteId` do cliente criado e os dados da compra (o DAO valida o cliente).
+	4) Bibliotecas → Incluir: associe uma biblioteca a um `clienteId` se desejar.
+
+- Dicas:
+	- Em operações de alteração, deixar o campo vazio (apertar Enter) normalmente mantém o valor atual.
+	- Veja mensagens de sucesso/erro exibidas no console após cada operação.
+	- Para testar de forma determinística, limpe os DBs (`Remove-Item -Recurse -Force .\dados\*`) e use `teste.SeedData` para criar um cliente seed antes de abrir o `Principal`.
+
+Se quiser, posso adicionar exemplos de execução (fluxo com entradas e saídas do console) ou melhorar os menus para prompts mais claros.
 
