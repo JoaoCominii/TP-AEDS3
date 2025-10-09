@@ -75,41 +75,4 @@ O sistema seguirá o padrão **MVC + DAO**, onde:
 ## Diagrama de Arquitetura em Camadas
 ![Diagrama de Arquitetura em Camadas](img/Arquitetura.jpg)
 
-## Como compilar e rodar os testes (instruções rápidas)
-
-Requisitos: JDK 11+ e PowerShell (as instruções abaixo assumem PowerShell no Windows).
-
-1) Compilar todos os fontes:
-
-```powershell
-Set-Location -LiteralPath 'C:\Users\jujuc\Downloads\TP-AEDS3'
-$files = Get-ChildItem -Recurse -Filter *.java | ForEach-Object FullName
-javac -d . $files
-```
-
-2) (Opcional) Limpar DBs para execução determinística:
-
-```powershell
-# CUIDADO: apaga todos os dados persistidos
-Remove-Item -Recurse -Force .\dados\*
-```
-
-3) Criar cliente seed (gera ID 1):
-
-```powershell
-java -cp . teste.SeedData
-```
-
-4) Rodar testes individuais (ordem sugerida):
-
-```powershell
-java -cp . teste.TestBuscar
-java -cp . teste.TestAlterar
-java -cp . teste.TestBiblioteca
-java -cp . teste.TestJogo
-java -cp . teste.TestCompra
-```
-
-Notas:
-- Os arquivos de dados ficam em `dados/<entidade>/<entidade>.db`. Recomendamos adicionar `dados/` ao `.gitignore`.
-- Mudanças no layout binário podem quebrar compatibilidade; o projeto inclui fallbacks em alguns `fromByteArray` para manter compatibilidade com registros antigos.
+<!-- As instruções de compilação e execução dos testes foram movidas para TP-PARTE2.md -->

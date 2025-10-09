@@ -95,3 +95,28 @@ Observações:
 - Ao ler (`fromByteArray`) as classes devem respeitar exatamente a mesma ordem de campos.
 - Para compatibilidade com versões antigas (quando um campo foi adicionado), o projeto implementa fallback nos `fromByteArray` (tenta o formato novo e, em caso de EOF/erro, tenta o formato antigo e preenche valores padrão como `clienteId = -1`).
 
+## Como compilar e rodar os testes (instruções rápidas)
+
+Requisitos: JDK 11+ e PowerShell (as instruções abaixo assumem PowerShell no Windows).
+
+
+1) Criar cliente seed (gera ID 1):
+
+```powershell
+java -cp . teste.SeedData
+```
+
+2) Rodar testes individuais (ordem sugerida):
+
+```powershell
+java -cp . teste.TestBuscar
+java -cp . teste.TestAlterar
+java -cp . teste.TestBiblioteca
+java -cp . teste.TestJogo
+java -cp . teste.TestCompra
+```
+
+Notas:
+- Os arquivos de dados ficam em `dados/<entidade>/<entidade>.db`. Recomendamos adicionar `dados/` ao `.gitignore`.
+- Mudanças no layout binário podem quebrar compatibilidade; o projeto inclui fallbacks em alguns `fromByteArray` para manter compatibilidade com registros antigos.
+
