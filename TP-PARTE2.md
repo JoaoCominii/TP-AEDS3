@@ -43,7 +43,7 @@ d) Além das PKs, quais outras chaves foram utilizadas nesta etapa?
 	- `BibliotecaJogo.bibliotecaId` — FK utilizada como chave de pesquisa para obter todos os jogos vinculados a uma biblioteca (relacionamento 1:N)
 	- `BibliotecaJogo.jogoId` — FK utilizada como chave de busca para consultas inversas (quais bibliotecas possuem determinado jogo)
 
-e) Quais tipos de estruturas B+Tree foram utilizadas para cada chave de pesquisa?
+e) Quais tipos de estruturas B+Tree e Hash foram utilizadas para cada chave de pesquisa?
 
 - Para otimizar as operações de busca e navegação ordenada, foram implementadas estruturas de Árvore B+ (B+Tree) específicas para cada tipo de chave indexada:
 	- `ArvoreBMaisPreco` (associada a `Jogo.preco`)
@@ -58,7 +58,18 @@ e) Quais tipos de estruturas B+Tree foram utilizadas para cada chave de pesquisa
 		- Tipo: Árvore B+ com chaves `int`
 		- Finalidade: recuperar os registros de jogos associados a uma biblioteca (1:N Biblioteca → Jogos)
 		- Exemplo de uso: `buscarJogosDaBiblioteca(1)`
-
+  - A Hash Extensível é uma técnica de hashing dinâmica, desenvolvida para resolver problemas de colisão e crescimento de buckets de forma eficiente.
+  	- Diretório: uma tabela de ponteiros para buckets.
+		- Cada ponteiro é associado a um prefixo binário dos bits do hash da chave.
+		- O tamanho do diretório cresce dinamicamente quando algum bucket fica cheio e precisa dividir.
+	- Buckets: armazenam os registros (no caso, Compra) até uma capacidade máxima.
+  		- Cada bucket tem sua própria profundidade local (local depth).
+    	- Quando cheio, ele é dividido, e o diretório é atualizado.
+    -  Hash da chave: usamos o valor da compra (valor) como chave.
+        - Aplicamos hash(valor) → converte para inteiro → usamos os bits menos significativos para indexar o diretório.
+g) Como os índices são persistidos em disco? (formato, atualização, sincronização com os
+dados).
+	- Os índices são persistidos no formato de arvores B+ e com Hash Extensíveis, com atualização imediata com as alterações e deleções executadas durante o programa. 
 h) Como está estruturado o projeto no GitHub (pastas, módulos, arquitetura)?
 
 - Arquitetura geral: padrão MVC combinado com DAOs para persistência.
