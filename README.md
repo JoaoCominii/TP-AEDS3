@@ -77,4 +77,4 @@ O sistema seguirá o padrão **MVC + DAO**, onde:
 
 ## TP - PARTE 2
 
-[Formula e instruções do tp parte 2](TP-PARTE2.md)
+[Formulario e instruções do tp parte 2](TP-PARTE2.md)
