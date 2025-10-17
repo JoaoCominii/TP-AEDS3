@@ -29,6 +29,36 @@ c) Como foi implementada a exclusão lógica?
 - Reutilização de espaço:
 	- Ao criar (`create`) ou ao atualizar (`update`) com um novo payload maior, o código tenta recuperar um bloco da free-list com `getDeleted` e reutilizá-lo (se couber); caso contrário, anexa no final do arquivo.
 
+d) Além das PKs, quais outras chaves foram utilizadas nesta etapa?
+
+- Foram utilizadas chaves Primárias (PKs) para garantir unicidade dos registros nas entidades principais:
+	- `Jogo.id`
+	- `Cliente.id`
+	- `Biblioteca.id`
+	- `CompraJogo.id`
+	- `BibliotecaJogo.id`
+- Além das PKs, outras chaves foram utilizadas com finalidade de indexação e busca eficiente, principalmente para relacionamentos e consultas específicas:
+	- `Jogo.preco` — utilizado como chave de busca para consultas por valor exato ou por faixa de preço
+	- `Biblioteca.clienteId` — chave estrangeira (FK) usada como critério de busca no relacionamento 1:N (Cliente → Biblioteca)
+	- `BibliotecaJogo.bibliotecaId` — FK utilizada como chave de pesquisa para obter todos os jogos vinculados a uma biblioteca (relacionamento 1:N)
+	- `BibliotecaJogo.jogoId` — FK utilizada como chave de busca para consultas inversas (quais bibliotecas possuem determinado jogo)
+
+e) Quais tipos de estruturas B+Tree foram utilizadas para cada chave de pesquisa?
+
+- Para otimizar as operações de busca e navegação ordenada, foram implementadas estruturas de Árvore B+ (B+Tree) específicas para cada tipo de chave indexada:
+	- `ArvoreBMaisPreco` (associada a `Jogo.preco`)
+		- Tipo: Árvore B+ com chaves `double`
+		- Finalidade: busca direta por preço e busca por intervalos (faixa de valores)
+		- Exemplo de uso: `buscarPorFaixaPreco(30.0, 80.0)`
+	- `ArvoreBMaisClienteBiblioteca` (associada a `Biblioteca.clienteId`)
+		- Tipo: Árvore B+ com chaves `int`
+		- Finalidade: localizar rapidamente todas as bibliotecas vinculadas a um cliente (relacionamento 1:N)
+		- Exemplo de uso: `buscarBibliotecaDoCliente(1)`
+	- `ArvoreBMaisBibliotecaJogo` (associada a `BibliotecaJogo.bibliotecaId`)
+		- Tipo: Árvore B+ com chaves `int`
+		- Finalidade: recuperar os registros de jogos associados a uma biblioteca (1:N Biblioteca → Jogos)
+		- Exemplo de uso: `buscarJogosDaBiblioteca(1)`
+
 h) Como está estruturado o projeto no GitHub (pastas, módulos, arquitetura)?
 
 - Arquitetura geral: padrão MVC combinado com DAOs para persistência.
@@ -112,6 +142,7 @@ java -cp . teste.TestAlterar
 java -cp . teste.TestBiblioteca
 java -cp . teste.TestJogo
 java -cp . teste.TestCompra
+java -cp . teste.TestBuscarPreco
 ```
 
 Notas:
