@@ -75,4 +75,6 @@ O sistema seguirá o padrão **MVC + DAO**, onde:
 ## Diagrama de Arquitetura em Camadas
 ![Diagrama de Arquitetura em Camadas](img/Arquitetura.jpg)
 
-<!-- As instruções de compilação e execução dos testes foram movidas para TP-PARTE2.md -->
+## TP - PARTE 2
+
+[Formula e instruções do tp parte 2](TP-PARTE2.md)
