@@ -17,8 +17,6 @@ public class HashExtensivel implements Serializable {
         diretorio.add(new Bucket(globalDepth));
     }
 
-    // --- OPERAÇÕES GENÉRICAS ---
-
     public void inserir(int chave, int valor) {
         int hash = hash(chave);
         int indice = getIndice(hash);
@@ -57,9 +55,6 @@ public class HashExtensivel implements Serializable {
         return todos;
     }
 
-
-    // --- MÉTODOS AUXILIARES ---
-
     private int hash(int chave) {
         return Integer.hashCode(chave);
     }
@@ -80,12 +75,11 @@ public class HashExtensivel implements Serializable {
         Bucket b0 = new Bucket(novaLocalDepth);
         Bucket b1 = new Bucket(novaLocalDepth);
 
-        // Redistribui os valores do bucket antigo
         for (Map.Entry<Integer, List<Integer>> entry : bucket.valores.entrySet()) {
             int chave = entry.getKey();
             List<Integer> lista = entry.getValue();
             int hash = hash(chave);
-            
+
             if (((hash >> localDepthAntigo) & 1) == 0) {
                 b0.valores.put(chave, new ArrayList<>(lista));
             } else {
@@ -93,7 +87,6 @@ public class HashExtensivel implements Serializable {
             }
         }
 
-        // Atualiza referências no diretório
         for (int i = 0; i < diretorio.size(); i++) {
             if (diretorio.get(i) == bucket) {
                 if (((i >> localDepthAntigo) & 1) == 0) {
@@ -106,12 +99,11 @@ public class HashExtensivel implements Serializable {
     }
 
     private void duplicarDiretorio() {
-        diretorio.addAll(new ArrayList<>(diretorio)); // Duplica o diretório
+        diretorio.addAll(new ArrayList<>(diretorio));
         globalDepth++;
     }
 
-    // --- PERSISTÊNCIA ---
-
+    @SuppressWarnings("unchecked")
     public static HashExtensivel carregarDeDisco(String path) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
             return (HashExtensivel) ois.readObject();
@@ -123,8 +115,6 @@ public class HashExtensivel implements Serializable {
             oos.writeObject(this);
         }
     }
-
-    // --- CLASSE INTERNA BUCKET ---
 
     private static class Bucket implements Serializable {
         private static final long serialVersionUID = 1L;

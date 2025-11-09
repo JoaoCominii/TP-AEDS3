@@ -1,19 +1,27 @@
 package view;
 
 import dao.CompraDAO;
-import model.Compra;
-import util.OutputFormatter;
-
+import dao.CompraJogoDAO;
+import dao.JogoDAO;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
+import model.Compra;
+import model.CompraJogo;
+import model.Jogo;
+import util.OutputFormatter;
 
 public class MenuCompras {
     private CompraDAO compraDAO;
+    private CompraJogoDAO compraJogoDAO;
+    private JogoDAO jogoDAO;
     private Scanner console;
 
     public MenuCompras(Scanner console) throws Exception {
         this.console = console;
         this.compraDAO = new CompraDAO();
+        this.compraJogoDAO = new CompraJogoDAO();
+        this.jogoDAO = new JogoDAO();
     }
 
     public void menu() {
@@ -26,6 +34,8 @@ public class MenuCompras {
             System.out.println("3 - Alterar");
             System.out.println("4 - Excluir");
             System.out.println("5 - Listar");
+            System.out.println("6 - Adicionar Jogo a uma Compra");
+            System.out.println("7 - Listar Jogos de uma Compra");
             System.out.println("0 - Voltar");
             System.out.print("Opção: ");
             try { opcao = Integer.parseInt(console.nextLine()); } catch (NumberFormatException e) { opcao = -1; }
@@ -35,6 +45,8 @@ public class MenuCompras {
                 case 3: alterar(); break;
                 case 4: excluir(); break;
                 case 5: listar(); break;
+                case 6: adicionarJogoACompra(); break;
+                case 7: listarJogosDaCompra(); break;
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
@@ -50,6 +62,93 @@ public class MenuCompras {
             if (c != null) System.out.println(OutputFormatter.formatCompra(c));
             else System.out.println("Compra não encontrada.");
         } catch (Exception e) { System.out.println("Erro ao buscar compra."); e.printStackTrace(); }
+    }
+
+    private void adicionarJogoACompra() {
+        System.out.print("ID da Compra: ");
+        int idCompra;
+        try { idCompra = Integer.parseInt(console.nextLine()); } catch (NumberFormatException e) { System.out.println("ID de compra inválido."); return; }
+
+        System.out.print("ID do Jogo: ");
+        int idJogo;
+        try { idJogo = Integer.parseInt(console.nextLine()); } catch (NumberFormatException e) { System.out.println("ID de jogo inválido."); return; }
+
+        try {
+            Compra compra = compraDAO.buscar(idCompra);
+            if (compra == null) {
+                System.out.println("Compra não encontrada.");
+                return;
+            }
+            Jogo jogo = jogoDAO.buscar(idJogo);
+            if (jogo == null) {
+                System.out.println("Jogo não encontrado.");
+                return;
+            }
+
+            System.out.print("Preço pago (deixe em branco para usar o preço atual do jogo R$" + jogo.getPreco() + "): ");
+            String precoStr = console.nextLine();
+            double precoPago;
+            if (precoStr.isEmpty()) {
+                precoPago = jogo.getPreco();
+            } else {
+                try {
+                    precoPago = Double.parseDouble(precoStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Preço inválido. Usando o preço atual do jogo.");
+                    precoPago = jogo.getPreco();
+                }
+            }
+
+            CompraJogo cj = new CompraJogo(idCompra, idJogo, precoPago, LocalDate.now());
+            try {
+                compraJogoDAO.create(cj);
+                System.out.println("Jogo adicionado à compra com sucesso!");
+            } catch(Exception e) {
+                 System.out.println("Erro ao adicionar jogo à compra: " + e.getMessage());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao adicionar jogo à compra: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void listarJogosDaCompra() {
+        System.out.print("ID da Compra: ");
+        int idCompra;
+        try { idCompra = Integer.parseInt(console.nextLine()); } catch (NumberFormatException e) { System.out.println("ID de compra inválido."); return; }
+
+        try {
+            Compra compra = compraDAO.buscar(idCompra);
+            if (compra == null) {
+                System.out.println("Compra não encontrada.");
+                return;
+            }
+
+            List<Integer> idsJogo = compraJogoDAO.getIdsJogoPorCompra(idCompra);
+            if (idsJogo == null || idsJogo.isEmpty()) {
+                System.out.println("Nenhum jogo encontrado para esta compra.");
+                return;
+            }
+
+            System.out.println("\n--- Jogos da Compra ID: " + idCompra + " ---");
+            for (int idJogo : idsJogo) {
+                CompraJogo cj = compraJogoDAO.read(idCompra, idJogo);
+                if (cj != null) {
+                    Jogo jogo = jogoDAO.buscar(cj.getIdJogo());
+                    if (jogo != null) {
+                        System.out.println(OutputFormatter.formatJogo(jogo) + 
+                                           " | Preço Pago: R$" + String.format("%.2f", cj.getPrecoPago()) +
+                                           " | Data Adição: " + cj.getDataAdicao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    }
+                }
+            }
+            System.out.println("---------------------------------");
+
+        } catch (Exception e) {
+            System.out.println("Erro ao listar jogos da compra: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void incluir() {

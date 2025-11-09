@@ -1,14 +1,15 @@
 package dao;
 
-import model.Compra;
-import dao.ClienteDAO;
 import model.Cliente;
+import model.Compra;
 
 public class CompraDAO {
     private Arquivo<Compra> arq;
+    private CompraJogoDAO compraJogoDAO;
 
     public CompraDAO() throws Exception {
         arq = new Arquivo<>("compras", Compra.class.getConstructor());
+        compraJogoDAO = new CompraJogoDAO();
     }
 
     public Compra buscar(int id) throws Exception { return arq.read(id); }
@@ -38,5 +39,14 @@ public class CompraDAO {
         }
         return alterar(c);
     }
-    public boolean excluir(int id) throws Exception { return arq.delete(id); }
+    public boolean excluir(int id) throws Exception { 
+        // Cascade delete: remove all related CompraJogo entries first
+        java.util.List<Integer> idsJogo = compraJogoDAO.getIdsJogoPorCompra(id);
+        if (idsJogo != null) {
+            for (int idJogo : idsJogo) {
+                compraJogoDAO.delete(id, idJogo);
+            }
+        }
+        return arq.delete(id); 
+    }
 }

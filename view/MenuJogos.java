@@ -1,19 +1,27 @@
 package view;
 
+import dao.CompraDAO;
+import dao.CompraJogoDAO;
 import dao.JogoDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import model.Compra;
+import model.CompraJogo;
 import model.Jogo;
 import util.OutputFormatter;
 
 public class MenuJogos {
     private JogoDAO jogoDAO;
+    private CompraDAO compraDAO;
+    private CompraJogoDAO compraJogoDAO;
     private Scanner console;
 
     public MenuJogos(Scanner console) throws Exception {
         this.console = console;
         this.jogoDAO = new JogoDAO();
+        this.compraDAO = new CompraDAO();
+        this.compraJogoDAO = new CompraJogoDAO();
     }
 
     public void menu() {
@@ -27,6 +35,7 @@ public class MenuJogos {
             System.out.println("4 - Excluir");
             System.out.println("5 - Listar");
             System.out.println("6 - Reconstruir índice de preços");
+            System.out.println("7 - Listar Compras de um Jogo");
             System.out.println("0 - Voltar");
             System.out.print("Opção: ");
             try {
@@ -41,6 +50,7 @@ public class MenuJogos {
                 case 4: excluir(); break;
                 case 5: listar(); break;
                 case 6: reconstruirIndice(); break;
+                case 7: listarComprasDeJogo(); break;
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
@@ -127,6 +137,44 @@ public class MenuJogos {
             }
         } catch (Exception e) {
             System.out.println("Erro ao excluir jogo.");
+            e.printStackTrace();
+        }
+    }
+
+    private void listarComprasDeJogo() {
+        System.out.print("ID do Jogo: ");
+        int idJogo;
+        try { idJogo = Integer.parseInt(console.nextLine()); } catch (NumberFormatException e) { System.out.println("ID de jogo inválido."); return; }
+
+        try {
+            Jogo jogo = jogoDAO.buscar(idJogo);
+            if (jogo == null) {
+                System.out.println("Jogo não encontrado.");
+                return;
+            }
+
+            List<Integer> idsCompra = compraJogoDAO.getIdsCompraPorJogo(idJogo);
+            if (idsCompra == null || idsCompra.isEmpty()) {
+                System.out.println("Nenhuma compra encontrada para este jogo.");
+                return;
+            }
+
+            System.out.println("\n--- Compras do Jogo: " + jogo.getNome() + " (ID: " + idJogo + ") ---");
+            for (int idCompra : idsCompra) {
+                CompraJogo cj = compraJogoDAO.read(idCompra, idJogo);
+                if (cj != null) {
+                    Compra compra = compraDAO.buscar(cj.getIdCompra());
+                    if (compra != null) {
+                        System.out.println(OutputFormatter.formatCompra(compra) + 
+                                           " | Preço Pago: R$" + String.format("%.2f", cj.getPrecoPago()) +
+                                           " | Data Adição: " + cj.getDataAdicao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    }
+                }
+            }
+            System.out.println("----------------------------------------------------");
+
+        } catch (Exception e) {
+            System.out.println("Erro ao listar compras do jogo: " + e.getMessage());
             e.printStackTrace();
         }
     }

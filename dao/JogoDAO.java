@@ -6,10 +6,12 @@ import model.Jogo;
 public class JogoDAO {
     private Arquivo<Jogo> arq;
     private IndicePrecoJogo indicePreco;
+    private CompraJogoDAO compraJogoDAO;
     
     public JogoDAO() throws Exception {
         arq = new Arquivo<>("jogos", Jogo.class.getConstructor());
         indicePreco = new IndicePrecoJogo(this);
+        compraJogoDAO = new CompraJogoDAO();
     }
     
     public List<Jogo> listarTodos() throws Exception {
@@ -67,6 +69,14 @@ public class JogoDAO {
     }
     
     public boolean excluir(int id) throws Exception {
+        // Cascade delete: remove all related CompraJogo entries first
+        java.util.List<Integer> idsCompra = compraJogoDAO.getIdsCompraPorJogo(id);
+        if (idsCompra != null) {
+            for (int idCompra : idsCompra) {
+                compraJogoDAO.delete(idCompra, id);
+            }
+        }
+
         Jogo jogo = buscar(id);
         boolean sucesso = arq.delete(id);
         if (sucesso && jogo != null) {
