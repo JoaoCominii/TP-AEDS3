@@ -1,7 +1,7 @@
 package dao;
-import model.Jogo;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import model.Jogo;
 
 public class JogoDAO {
     private Arquivo<Jogo> arq;
@@ -9,24 +9,11 @@ public class JogoDAO {
     
     public JogoDAO() throws Exception {
         arq = new Arquivo<>("jogos", Jogo.class.getConstructor());
-        indicePreco = new IndicePrecoJogo();
-        carregarIndicePreco();
+        indicePreco = new IndicePrecoJogo(this);
     }
     
-    private void carregarIndicePreco() {
-        try {
-            List<Jogo> jogos = listarTodos();
-            for (Jogo jogo : jogos) {
-                indicePreco.adicionarJogo(jogo);
-            }
-            System.out.println("Indice de precos carregado com " + jogos.size() + " jogos");
-        } catch (Exception e) {
-            System.err.println("Erro ao carregar indice de precos: " + e.getMessage());
-        }
-    }
-    
-    private List<Jogo> listarTodos() throws Exception {
-        List<Jogo> jogos = new ArrayList<Jogo>();
+    public List<Jogo> listarTodos() throws Exception {
+        List<Jogo> jogos = new ArrayList<>();
         
         int id = 1;
         int tentativasConsecutivasFalhas = 0;
@@ -60,6 +47,7 @@ public class JogoDAO {
         boolean sucesso = arq.create(j) > 0;
         if (sucesso) {
             indicePreco.adicionarJogo(j);
+            indicePreco.salvarIndice();
         }
         return sucesso;
     }
@@ -73,6 +61,7 @@ public class JogoDAO {
         boolean sucesso = arq.update(j);
         if (sucesso) {
             indicePreco.adicionarJogo(j);
+            indicePreco.salvarIndice();
         }
         return sucesso;
     }
@@ -82,6 +71,7 @@ public class JogoDAO {
         boolean sucesso = arq.delete(id);
         if (sucesso && jogo != null) {
             indicePreco.removerJogo(jogo);
+            indicePreco.salvarIndice();
         }
         return sucesso;
     }
@@ -107,6 +97,10 @@ public class JogoDAO {
         return indicePreco.listarOrdenadosPorPreco();
     }
     
+    public void reconstruirIndicePreco() {
+        indicePreco.reconstruirIndice();
+    }
+
     public void exibirEstatisticasPreco() {
         System.out.println("\n=== ESTATISTICAS DE PRECOS ===");
         

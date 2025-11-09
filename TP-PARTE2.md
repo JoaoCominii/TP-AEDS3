@@ -59,6 +59,27 @@ e) Quais tipos de estruturas B+Tree foram utilizadas para cada chave de pesquisa
 		- Finalidade: recuperar os registros de jogos associados a uma biblioteca (1:N Biblioteca → Jogos)
 		- Exemplo de uso: `buscarJogosDaBiblioteca(1)`
 
+f) Como foi implementado o relacionamento 1:N (ex: Cliente → Bibliotecas)?
+
+- **Modelo de Dados:** O relacionamento é representado por uma chave estrangeira. A classe `Biblioteca` possui um atributo `clienteId` que armazena o ID do `Cliente` ao qual pertence.
+- **Implementação na Aplicação:** Não há um enforcement do relacionamento no nível do banco de dados (arquivo binário). A lógica é gerenciada pela camada de aplicação (DAO).
+- **Busca:** Para encontrar todas as bibliotecas de um cliente, o `BibliotecaDAO` não usa um índice complexo. Ele itera sobre todos os registros de bibliotecas e filtra aqueles cujo `clienteId` corresponde ao ID do cliente desejado. Isso é uma varredura sequencial (full scan) do arquivo `bibliotecas.db`.
+- **Validação:** A validação de integridade referencial (garantir que um `clienteId` em uma `Biblioteca` aponta para um `Cliente` existente) é feita manualmente no código da aplicação, por exemplo, no método `BibliotecaDAO.incluirComValidacao`, antes de inserir uma nova biblioteca.
+
+g) Como os índices são persistidos em disco?
+
+- **Estratégia de Persistência:** A persistência do índice de preços (`ArvoreBMaisPreco`) é realizada através da serialização de objetos Java. A árvore inteira, com sua estrutura de nós e chaves, é gravada em um único arquivo binário.
+- **Arquivo de Índice:** O índice é salvo no arquivo `dados/jogos/preco_idx.db`.
+- **Carregamento (Load):**
+	1. Ao iniciar a aplicação, o `JogoDAO` instancia `IndicePrecoJogo`.
+	2. O construtor de `IndicePrecoJogo` tenta carregar o objeto da árvore B+ a partir de `preco_idx.db` usando `ObjectInputStream`.
+	3. Se o arquivo não existir (primeira execução ou após uma limpeza), uma nova árvore vazia é criada em memória e preenchida com os dados do arquivo principal de jogos (`jogos.db`).
+	4. Após o carregamento, os ponteiros `transient` (pai, irmão anterior/próximo) dos nós são reconstruídos para restaurar a funcionalidade completa da árvore em memória.
+- **Salvamento (Save):**
+	1. Após qualquer operação de Criação, Alteração ou Exclusão (CUD) em um `Jogo`, o `JogoDAO` invoca o método `indicePreco.salvarIndice()`.
+	2. Este método utiliza `ObjectOutputStream` para serializar e sobrescrever o objeto `ArvoreBMaisPreco` completo no arquivo `preco_idx.db`. Isso garante que o índice no disco esteja sempre sincronizado com os dados.
+- **Manutenção:** Foi adicionada uma opção no menu de Jogos para "Reconstruir índice de preços", que apaga o índice atual e o recria a partir do zero, lendo todos os jogos do arquivo de dados principal. Isso serve como uma ferramenta de recuperação para casos de corrupção do arquivo de índice.
+
 h) Como está estruturado o projeto no GitHub (pastas, módulos, arquitetura)?
 
 - Arquitetura geral: padrão MVC combinado com DAOs para persistência.

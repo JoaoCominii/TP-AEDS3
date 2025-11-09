@@ -16,6 +16,7 @@ public class Principal {
                 System.out.println("2 - Bibliotecas");
                 System.out.println("3 - Jogos");
                 System.out.println("4 - Compras");
+                System.out.println("5 - Busca por Preço (Índice)");
                 System.out.println("0 - Sair");
 
                 System.out.print("\nOpção: ");
@@ -41,6 +42,10 @@ public class Principal {
                     case 4:
                         MenuCompras menuCompras = new MenuCompras(console);
                         menuCompras.menu();
+                        break;
+                    case 5:
+                        MenuBuscaPreco menuBuscaPreco = new MenuBuscaPreco(console);
+                        menuBuscaPreco.menu();
                         break;
                     case 0:
                         System.out.println("Saindo...");

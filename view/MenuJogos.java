@@ -1,12 +1,11 @@
 package view;
 
 import dao.JogoDAO;
-import model.Jogo;
-import util.OutputFormatter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import model.Jogo;
+import util.OutputFormatter;
 
 public class MenuJogos {
     private JogoDAO jogoDAO;
@@ -27,6 +26,7 @@ public class MenuJogos {
             System.out.println("3 - Alterar");
             System.out.println("4 - Excluir");
             System.out.println("5 - Listar");
+            System.out.println("6 - Reconstruir índice de preços");
             System.out.println("0 - Voltar");
             System.out.print("Opção: ");
             try {
@@ -40,6 +40,7 @@ public class MenuJogos {
                 case 3: alterar(); break;
                 case 4: excluir(); break;
                 case 5: listar(); break;
+                case 6: reconstruirIndice(); break;
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
@@ -127,6 +128,18 @@ public class MenuJogos {
         } catch (Exception e) {
             System.out.println("Erro ao excluir jogo.");
             e.printStackTrace();
+        }
+    }
+
+    private void reconstruirIndice() {
+        System.out.print("Tem certeza que deseja reconstruir o índice de preços? (S/N): ");
+        String resp = console.nextLine();
+        if (resp.equalsIgnoreCase("S")) {
+            System.out.println("Reconstruindo... aguarde.");
+            jogoDAO.reconstruirIndicePreco();
+            System.out.println("Índice reconstruído com sucesso.");
+        } else {
+            System.out.println("Operação cancelada.");
         }
     }
 

@@ -1,10 +1,10 @@
 package teste;
 
 import dao.JogoDAO;
-import model.Jogo;
-import util.OutputFormatter;
 import java.util.List;
 import java.util.Scanner;
+import model.Jogo;
+import util.OutputFormatter;
 
 public class TestBuscarPreco {
     public static void main(String[] args) {
@@ -58,7 +58,7 @@ public class TestBuscarPreco {
                         break;
                         
                     case 6:
-                        jogoDAO.relatorioPorPreco();
+                        jogoDAO.exibirEstatisticasPreco();
                         break;
                         
                     case 0:

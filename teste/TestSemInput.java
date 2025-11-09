@@ -1,8 +1,8 @@
 package teste;
 
 import dao.JogoDAO;
-import model.Jogo;
 import java.util.List;
+import model.Jogo;
 
 public class TestSemInput {
     public static void main(String[] args) {
@@ -81,7 +81,7 @@ public class TestSemInput {
             
             // Teste 8: Estatísticas
             System.out.println("\n8. Exibindo estatísticas...");
-            dao.relatorioPorPreco();
+            dao.exibirEstatisticasPreco();
             
             // Teste 9: Listar ordenados por preço
             System.out.println("\n9. Listando todos ordenados por preço...");
