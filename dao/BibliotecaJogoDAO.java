@@ -42,14 +42,29 @@ public class BibliotecaJogoDAO {
         return relacoes;
     }
 
+    public List<model.Jogo> buscarJogosDaBiblioteca(int bibliotecaId) {
+        return indice.buscarJogosPorBiblioteca(bibliotecaId);
+    }
+
+    public List<BibliotecaJogo> buscarRelacoesDaBiblioteca(int bibliotecaId) throws Exception {
+        List<BibliotecaJogo> todasRelacoes = listarTodos();
+        List<BibliotecaJogo> relacoesDaBiblioteca = new ArrayList<>();
+        for (BibliotecaJogo bj : todasRelacoes) {
+            if (bj.getBibliotecaId() == bibliotecaId) {
+                relacoesDaBiblioteca.add(bj);
+            }
+        }
+        return relacoesDaBiblioteca;
+    }
+
     public boolean incluir(BibliotecaJogo bj) throws Exception {
-        // Validações (ex: se a biblioteca e o jogo existem) podem ser adicionadas aqui
-        boolean sucesso = arq.create(bj) > 0;
-        if (sucesso) {
+        int id = arq.create(bj);
+        if (id > 0) {
             indice.adicionar(bj);
             indice.salvarIndice();
+            return true;
         }
-        return sucesso;
+        return false;
     }
 
     public boolean excluir(int id) throws Exception {
@@ -64,10 +79,6 @@ public class BibliotecaJogoDAO {
     
     public BibliotecaJogo buscar(int id) throws Exception {
         return arq.read(id);
-    }
-
-    public List<model.Jogo> buscarJogosDaBiblioteca(int bibliotecaId) {
-        return indice.buscarJogosPorBiblioteca(bibliotecaId);
     }
 
     public void reconstruirIndice() {

@@ -1,79 +1,67 @@
 package dao;
 
-import model.Compra;
+import java.io.*;
 import java.util.*;
 
-public class HashExtensivel {
-    private int globalDepth;              // profundidade global
-    private int bucketSize;               // capacidade máxima de cada bucket
-    private List<Bucket> diretorio;       // diretório (tabela de ponteiros)
+public class HashExtensivel implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private int globalDepth;
+    private final int bucketSize;
+    private final List<Bucket> diretorio;
 
     public HashExtensivel(int bucketSize) {
         this.globalDepth = 1;
         this.bucketSize = bucketSize;
         this.diretorio = new ArrayList<>();
-
-        // inicializa com 2 buckets
         diretorio.add(new Bucket(globalDepth));
         diretorio.add(new Bucket(globalDepth));
     }
 
-    // --- Inserção ---
+    // --- OPERAÇÕES GENÉRICAS ---
 
-    public void inserirCompra(Compra compra) {
-        double valor = compra.getValor();
-        int hash = hash(valor);
+    public void inserir(int chave, int valor) {
+        int hash = hash(chave);
         int indice = getIndice(hash);
 
         Bucket bucket = diretorio.get(indice);
-        bucket.inserir(valor, compra);
+        bucket.inserir(chave, valor);
 
-        // se o bucket estiver cheio -> dividir
         if (bucket.isFull(bucketSize)) {
-            dividirBucket(indice);
+            dividirBucket(bucket);
         }
     }
 
-    // --- Busca ---
-
-    public List<Compra> buscarPorValor(double valor) {
-        int hash = hash(valor);
+    public List<Integer> buscar(int chave) {
+        int hash = hash(chave);
         int indice = getIndice(hash);
         Bucket bucket = diretorio.get(indice);
-        return bucket.buscarPorValor(valor);
+        return bucket.buscar(chave);
     }
 
-    // --- Listagem ordenada (por valor) ---
-
-    public List<Compra> listarTodasOrdenadasPorValor() {
+    public boolean remover(int chave, int valor) {
+        int hash = hash(chave);
+        int indice = getIndice(hash);
+        Bucket bucket = diretorio.get(indice);
+        return bucket.remover(chave, valor);
+    }
+    
+    public List<Integer> listarTodosValores() {
         Set<Bucket> visitados = new HashSet<>();
-        List<Compra> todas = new ArrayList<>();
-
+        List<Integer> todos = new ArrayList<>();
         for (Bucket b : diretorio) {
             if (!visitados.contains(b)) {
-                todas.addAll(b.listarTodas());
+                todos.addAll(b.listarTodosValores());
                 visitados.add(b);
             }
         }
-
-        todas.sort(Comparator.comparingDouble(Compra::getValor));
-        return todas;
+        return todos;
     }
 
-    // --- Remoção ---
 
-    public boolean removerCompra(double valor, int compraId) {
-        int hash = hash(valor);
-        int indice = getIndice(hash);
-        Bucket bucket = diretorio.get(indice);
+    // --- MÉTODOS AUXILIARES ---
 
-        return bucket.remover(valor, compraId);
-    }
-
-    // --- Métodos auxiliares ---
-
-    private int hash(double valor) {
-        return Objects.hash(valor);
+    private int hash(int chave) {
+        return Integer.hashCode(chave);
     }
 
     private int getIndice(int hash) {
@@ -81,110 +69,102 @@ public class HashExtensivel {
         return hash & mask;
     }
 
-    private void dividirBucket(int indice) {
-        Bucket bucket = diretorio.get(indice);
+    private void dividirBucket(Bucket bucket) {
         int localDepthAntigo = bucket.localDepth;
-        int novaLocalDepth = localDepthAntigo + 1;
-
-        // se localDepth excede globalDepth, duplicar diretório
-        if (novaLocalDepth > globalDepth) {
+        
+        if (localDepthAntigo >= globalDepth) {
             duplicarDiretorio();
         }
-
-        // cria novos buckets
+        
+        int novaLocalDepth = localDepthAntigo + 1;
         Bucket b0 = new Bucket(novaLocalDepth);
         Bucket b1 = new Bucket(novaLocalDepth);
 
-        // redistribui as compras do bucket antigo
-        for (Map.Entry<Double, List<Compra>> e : bucket.compras.entrySet()) {
-            double valor = e.getKey();
-            List<Compra> lista = e.getValue();
-            int hash = hash(valor);
-            int novoIndice = hash & ((1 << novaLocalDepth) - 1);
-            if ((novoIndice & 1) == 0)
-                b0.compras.put(valor, new ArrayList<>(lista));
-            else
-                b1.compras.put(valor, new ArrayList<>(lista));
+        // Redistribui os valores do bucket antigo
+        for (Map.Entry<Integer, List<Integer>> entry : bucket.valores.entrySet()) {
+            int chave = entry.getKey();
+            List<Integer> lista = entry.getValue();
+            int hash = hash(chave);
+            
+            if (((hash >> localDepthAntigo) & 1) == 0) {
+                b0.valores.put(chave, new ArrayList<>(lista));
+            } else {
+                b1.valores.put(chave, new ArrayList<>(lista));
+            }
         }
 
-        // atualiza referências no diretório
+        // Atualiza referências no diretório
         for (int i = 0; i < diretorio.size(); i++) {
-            int hashI = i & ((1 << novaLocalDepth) - 1);
-            if ((hashI >>> (novaLocalDepth - 1)) == 0 && diretorio.get(i) == bucket) {
-                diretorio.set(i, b0);
-            } else if (diretorio.get(i) == bucket) {
-                diretorio.set(i, b1);
+            if (diretorio.get(i) == bucket) {
+                if (((i >> localDepthAntigo) & 1) == 0) {
+                    diretorio.set(i, b0);
+                } else {
+                    diretorio.set(i, b1);
+                }
             }
         }
     }
 
     private void duplicarDiretorio() {
-        int tamanhoAntigo = diretorio.size();
-        for (int i = 0; i < tamanhoAntigo; i++) {
-            diretorio.add(diretorio.get(i)); // duplicar referências
-        }
+        diretorio.addAll(new ArrayList<>(diretorio)); // Duplica o diretório
         globalDepth++;
     }
 
-    // --- Exibição da estrutura ---
+    // --- PERSISTÊNCIA ---
 
-    public void exibirEstrutura() {
-        System.out.println("\n=== Estrutura da Hash Extensível ===");
-        System.out.println("Profundidade global: " + globalDepth);
-        Set<Bucket> vistos = new HashSet<>();
-        int id = 1;
-        for (Bucket b : diretorio) {
-            if (!vistos.contains(b)) {
-                System.out.printf("Bucket %d (ld=%d): %d valores\n",
-                        id++, b.localDepth, b.compras.size());
-                for (Map.Entry<Double, List<Compra>> e : b.compras.entrySet()) {
-                    System.out.printf("  Valor R$%.2f -> %d compra(s)\n",
-                            e.getKey(), e.getValue().size());
-                }
-                vistos.add(b);
-            }
+    public static HashExtensivel carregarDeDisco(String path) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+            return (HashExtensivel) ois.readObject();
         }
-        System.out.println("=======================================================\n");
     }
 
-    // --- Classe interna Bucket ---
+    public void salvarEmDisco(String path) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
+            oos.writeObject(this);
+        }
+    }
 
-    private static class Bucket {
+    // --- CLASSE INTERNA BUCKET ---
+
+    private static class Bucket implements Serializable {
+        private static final long serialVersionUID = 1L;
         int localDepth;
-        Map<Double, List<Compra>> compras;
+        Map<Integer, List<Integer>> valores;
 
         Bucket(int localDepth) {
             this.localDepth = localDepth;
-            this.compras = new LinkedHashMap<>();
+            this.valores = new LinkedHashMap<>();
         }
 
         boolean isFull(int bucketSize) {
-            return compras.size() >= bucketSize;
+            return valores.size() >= bucketSize;
         }
 
-        void inserir(double valor, Compra compra) {
-            compras.computeIfAbsent(valor, k -> new ArrayList<>()).add(compra);
+        void inserir(int chave, int valor) {
+            valores.computeIfAbsent(chave, k -> new ArrayList<>()).add(valor);
         }
 
-        List<Compra> buscarPorValor(double valor) {
-            return compras.getOrDefault(valor, new ArrayList<>());
+        List<Integer> buscar(int chave) {
+            return valores.getOrDefault(chave, new ArrayList<>());
         }
 
-        boolean remover(double valor, int compraId) {
-            List<Compra> lista = compras.get(valor);
+        boolean remover(int chave, int valor) {
+            List<Integer> lista = valores.get(chave);
             if (lista == null) return false;
 
-            boolean removido = lista.removeIf(c -> c.getId() == compraId);
+            boolean removido = lista.remove(Integer.valueOf(valor));
             if (removido && lista.isEmpty()) {
-                compras.remove(valor);
+                valores.remove(chave);
             }
             return removido;
         }
 
-        List<Compra> listarTodas() {
-            List<Compra> todas = new ArrayList<>();
-            for (List<Compra> l : compras.values()) todas.addAll(l);
-            return todas;
+        List<Integer> listarTodosValores() {
+            List<Integer> todos = new ArrayList<>();
+            for (List<Integer> l : valores.values()) {
+                todos.addAll(l);
+            }
+            return todos;
         }
     }
 }

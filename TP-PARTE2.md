@@ -45,40 +45,50 @@ d) Além das PKs, quais outras chaves foram utilizadas nesta etapa?
 
 e) Quais tipos de estruturas B+Tree e Hash foram utilizadas para cada chave de pesquisa?
 
-- Para otimizar as operações de busca e navegação ordenada, foram implementadas estruturas de Árvore B+ (B+Tree) específicas para cada tipo de chave indexada:
-	- `ArvoreBMaisPreco` (associada a `Jogo.preco`)
-		- Tipo: Árvore B+ com chaves `double`
-		- Finalidade: busca direta por preço e busca por intervalos (faixa de valores)
-		- Exemplo de uso: `buscarPorFaixaPreco(30.0, 80.0)`
-	- `ArvoreBMaisClienteBiblioteca` (associada a `Biblioteca.clienteId`)
-		- Tipo: Árvore B+ com chaves `int`
-		- Finalidade: localizar rapidamente todas as bibliotecas vinculadas a um cliente (relacionamento 1:N)
-		- Exemplo de uso: `buscarBibliotecaDoCliente(1)`
-	- `ArvoreBMaisBibliotecaJogo` (associada a `BibliotecaJogo.bibliotecaId`)
-		- Tipo: Árvore B+ com chaves `int`
-		- Finalidade: recuperar os registros de jogos associados a uma biblioteca (1:N Biblioteca → Jogos)
-		- Exemplo de uso: `buscarJogosDaBiblioteca(1)`
+- Para otimizar as operações de busca, foram implementadas as seguintes estruturas de índice:
+	- **Hash Extensível** para o relacionamento `Cliente -> Bibliotecas` (chave `Biblioteca.clienteId`):
+		- Implementação: `dao.HashExtensivel`
+		- Tipo: Hash dinâmico com chaves `int` (ID do cliente) e valores `List<Integer>` (lista de IDs de bibliotecas).
+		- Finalidade: localizar rapidamente todas as bibliotecas de um cliente específico.
+		- Exemplo de uso: `buscarPorCliente(1)` no `MenuBiblioteca`.
+	- **Árvore B+** para a busca de `Jogos` por `preço`:
+		- Implementação: `dao.ArvoreBMaisPreco`
+		- Tipo: Árvore B+ com chaves `double`.
+		- Finalidade: busca por preço exato e, principalmente, por faixas de valores.
+		- Exemplo de uso: `buscarPorFaixaPreco(30.0, 80.0)`.
+	- **Árvore B+** para o relacionamento `Biblioteca -> Jogos` (chave `BibliotecaJogo.bibliotecaId`):
+		- Implementação: `dao.ArvoreBMaisBibliotecaJogo`
+		- Tipo: Árvore B+ com chaves `int`.
+		- Finalidade: recuperar todos os jogos associados a uma biblioteca.
+		- Exemplo de uso: `listarJogosDaBiblioteca(1)` no sub-menu de gerenciamento de jogos da biblioteca.
 
 f) Como foi implementado o relacionamento 1:N (ex: Cliente → Bibliotecas)?
 
 - **Modelo de Dados:** O relacionamento é representado por uma chave estrangeira. A classe `Biblioteca` possui um atributo `clienteId` que armazena o ID do `Cliente` ao qual pertence.
-- **Implementação na Aplicação:** Não há um enforcement do relacionamento no nível do banco de dados (arquivo binário). A lógica é gerenciada pela camada de aplicação (DAO).
-- **Busca:** Para encontrar todas as bibliotecas de um cliente, o `BibliotecaDAO` não usa um índice complexo. Ele itera sobre todos os registros de bibliotecas e filtra aqueles cujo `clienteId` corresponde ao ID do cliente desejado. Isso é uma varredura sequencial (full scan) do arquivo `bibliotecas.db`.
-- **Validação:** A validação de integridade referencial (garantir que um `clienteId` em uma `Biblioteca` aponta para um `Cliente` existente) é feita manualmente no código da aplicação, por exemplo, no método `BibliotecaDAO.incluirComValidacao`, antes de inserir uma nova biblioteca.
+- **Estrutura de Índice:** Para otimizar a busca de bibliotecas por cliente, foi implementado um índice de **Hash Extensível** (`dao.HashExtensivel`).
+- **Funcionamento:**
+	1. O `HashExtensivel` mapeia o `clienteId` (chave) a uma lista de IDs de bibliotecas (`List<Integer>`).
+	2. A classe `IndiceClienteHash` gerencia o ciclo de vida deste índice, incluindo seu carregamento e salvamento.
+	3. Quando uma biblioteca é criada, alterada ou excluída, o `BibliotecaDAO` atualiza o índice de hash para refletir a mudança na associação.
+- **Busca:** Para encontrar todas as bibliotecas de um cliente, o `BibliotecaDAO` consulta o índice de hash com o `clienteId`. Isso retorna diretamente a lista de IDs das bibliotecas correspondentes, que são então carregadas do arquivo principal. Este método é muito mais eficiente do que uma varredura sequencial.
+- **Validação:** A validação de integridade referencial (garantir que um `clienteId` em uma `Biblioteca` aponta para um `Cliente` existente) continua sendo feita manualmente no código da aplicação, por exemplo, no método `BibliotecaDAO.incluirComValidacao`.
 
 g) Como os índices são persistidos em disco?
 
-- **Estratégia de Persistência:** A persistência do índice de preços (`ArvoreBMaisPreco`) é realizada através da serialização de objetos Java. A árvore inteira, com sua estrutura de nós e chaves, é gravada em um único arquivo binário.
-- **Arquivo de Índice:** O índice é salvo no arquivo `dados/jogos/preco_idx.db`.
+- **Estratégia de Persistência:** Todos os índices (`HashExtensivel`, `ArvoreBMaisPreco`, `ArvoreBMaisBibliotecaJogo`) são persistidos em disco através da **serialização de objetos Java**. A estrutura de dados completa (seja a tabela de hash com seus buckets ou a árvore B+ com seus nós) é gravada em um arquivo binário.
+- **Arquivos de Índice:**
+	- `dados/cliente_bibliotecas_hash.db`: Arquivo do índice de Hash Extensível para `Cliente -> Bibliotecas`.
+	- `dados/jogos/preco_idx.db`: Arquivo do índice de Árvore B+ para `Jogo.preco`.
+	- `dados/bibliotecas/biblioteca_jogo_idx.db`: Arquivo do índice de Árvore B+ para `Biblioteca -> Jogos`.
 - **Carregamento (Load):**
-	1. Ao iniciar a aplicação, o `JogoDAO` instancia `IndicePrecoJogo`.
-	2. O construtor de `IndicePrecoJogo` tenta carregar o objeto da árvore B+ a partir de `preco_idx.db` usando `ObjectInputStream`.
-	3. Se o arquivo não existir (primeira execução ou após uma limpeza), uma nova árvore vazia é criada em memória e preenchida com os dados do arquivo principal de jogos (`jogos.db`).
-	4. Após o carregamento, os ponteiros `transient` (pai, irmão anterior/próximo) dos nós são reconstruídos para restaurar a funcionalidade completa da árvore em memória.
+	1. Ao iniciar a aplicação, os DAOs correspondentes instanciam suas classes de gerenciamento de índice (`IndiceClienteHash`, `IndicePrecoJogo`, etc.).
+	2. O construtor da classe de índice tenta carregar o objeto serializado a partir do arquivo `.db` correspondente usando `ObjectInputStream`.
+	3. Se o arquivo não existir (primeira execução ou após uma limpeza), uma nova estrutura de índice vazia é criada em memória.
+	4. Para as Árvores B+, após o carregamento, os ponteiros `transient` (pai, irmão anterior/próximo) dos nós são reconstruídos para restaurar a funcionalidade completa da árvore em memória. O Hash Extensível não necessita dessa etapa de restauração pós-carregamento.
 - **Salvamento (Save):**
-	1. Após qualquer operação de Criação, Alteração ou Exclusão (CUD) em um `Jogo`, o `JogoDAO` invoca o método `indicePreco.salvarIndice()`.
-	2. Este método utiliza `ObjectOutputStream` para serializar e sobrescrever o objeto `ArvoreBMaisPreco` completo no arquivo `preco_idx.db`. Isso garante que o índice no disco esteja sempre sincronizado com os dados.
-- **Manutenção:** Foi adicionada uma opção no menu de Jogos para "Reconstruir índice de preços", que apaga o índice atual e o recria a partir do zero, lendo todos os jogos do arquivo de dados principal. Isso serve como uma ferramenta de recuperação para casos de corrupção do arquivo de índice.
+	1. Após qualquer operação de Criação, Alteração ou Exclusão (CUD) que afete os dados indexados, o DAO correspondente invoca o método de salvamento do seu gerenciador de índice (ex: `indiceCliente.salvarIndice()`).
+	2. Este método utiliza `ObjectOutputStream` para serializar e sobrescrever o objeto de índice completo no arquivo `.db`. Isso garante que o índice no disco esteja sempre sincronizado com os dados.
+- **Manutenção:** Foram adicionadas opções nos menus para "Reconstruir índice", que apagam o índice atual e o recriam a partir do zero, lendo todos os dados do arquivo principal. Isso serve como uma ferramenta de recuperação para casos de corrupção do arquivo de índice.
 
 h) Como está estruturado o projeto no GitHub (pastas, módulos, arquitetura)?
 

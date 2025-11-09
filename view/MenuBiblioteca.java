@@ -29,8 +29,8 @@ public class MenuBiblioteca {
             System.out.println("4 - Excluir");
             System.out.println("5 - Listar");
             System.out.println("6 - Gerenciar Jogos da Biblioteca");
-            System.out.println("7 - Buscar por Cliente");
-            System.out.println("8 - Reconstruir Índice Cliente->Biblioteca");
+            System.out.println("7 - Buscar por Cliente (Hash Extensível)");
+            System.out.println("8 - Reconstruir Índice Cliente->Biblioteca (Hash)");
             System.out.println("0 - Voltar");
 
             System.out.print("\nOpção: ");
@@ -139,14 +139,24 @@ public class MenuBiblioteca {
 
     private void listarJogosDaBiblioteca(int bibliotecaId) throws Exception {
         BibliotecaJogoDAO bjDAO = new BibliotecaJogoDAO();
-        List<Jogo> jogos = bjDAO.buscarJogosDaBiblioteca(bibliotecaId);
-        if (jogos.isEmpty()) {
+        List<BibliotecaJogo> relacoes = bjDAO.buscarRelacoesDaBiblioteca(bibliotecaId);
+        
+        if (relacoes.isEmpty()) {
             System.out.println("Nenhum jogo nesta biblioteca.");
         } else {
-            System.out.println("Jogos na biblioteca:");
-            for (Jogo j : jogos) {
-                System.out.println(OutputFormatter.formatJogo(j));
+            System.out.println("\n--- Jogos na Biblioteca (ID da Relação | ID do Jogo | Nome) ---");
+            dao.JogoDAO jogoDAO = new dao.JogoDAO();
+            for (BibliotecaJogo bj : relacoes) {
+                try {
+                    Jogo j = jogoDAO.buscar(bj.getJogoId());
+                    if (j != null) {
+                        System.out.printf("ID da Relação: %-4d | %s\n", bj.getId(), OutputFormatter.formatJogo(j));
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao buscar dados do jogo com ID: " + bj.getJogoId());
+                }
             }
+            System.out.println("----------------------------------------------------------");
         }
     }
 
@@ -184,10 +194,16 @@ public class MenuBiblioteca {
     }
 
     private void reconstruirIndice() {
-        System.out.print("Confirma a reconstrução do índice Cliente->Biblioteca? (S/N): ");
+        System.out.print("Confirma a reconstrução do índice Cliente->Biblioteca (Hash)? (S/N): ");
         String resp = console.nextLine();
         if (resp.equalsIgnoreCase("S")) {
-            bibliotecaDAO.reconstruirIndiceCliente();
+            try {
+                bibliotecaDAO.reconstruirIndiceCliente();
+                System.out.println("Índice reconstruído com sucesso.");
+            } catch (Exception e) {
+                System.out.println("Erro ao reconstruir índice: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             System.out.println("Operação cancelada.");
         }
