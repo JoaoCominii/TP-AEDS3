@@ -43,7 +43,7 @@ d) Além das PKs, quais outras chaves foram utilizadas nesta etapa?
 	- `BibliotecaJogo.bibliotecaId` — FK utilizada como chave de pesquisa para obter todos os jogos vinculados a uma biblioteca (relacionamento 1:N)
 	- `BibliotecaJogo.jogoId` — FK utilizada como chave de busca para consultas inversas (quais bibliotecas possuem determinado jogo)
 
-e) Quais tipos de estruturas B+Tree foram utilizadas para cada chave de pesquisa?
+e) Quais tipos de estruturas B+Tree e Hash foram utilizadas para cada chave de pesquisa?
 
 - Para otimizar as operações de busca e navegação ordenada, foram implementadas estruturas de Árvore B+ (B+Tree) específicas para cada tipo de chave indexada:
 	- `ArvoreBMaisPreco` (associada a `Jogo.preco`)
