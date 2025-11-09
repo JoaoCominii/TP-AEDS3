@@ -8,7 +8,7 @@ public class TestBiblioteca {
         try {
             BibliotecaDAO dao = new BibliotecaDAO();
             Biblioteca b = new Biblioteca("Central","Biblioteca central da cidade","ativa");
-            boolean ok = dao.incluir(b);
+            boolean ok = dao.incluirComValidacao(b);
             System.out.println("incluir returned: " + ok);
             Biblioteca b2 = dao.buscar(1);
             System.out.println(b2);

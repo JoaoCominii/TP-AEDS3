@@ -148,55 +148,74 @@ Observações:
 
 Requisitos: JDK 11+ e PowerShell (as instruções abaixo assumem PowerShell no Windows).
 
-
-1) Criar cliente seed (gera ID 1):
-
+1) Limpar dados antigos (opcional, mas recomendado para um teste limpo):
 ```powershell
-java -cp . teste.SeedData
+Remove-Item -Recurse -Force dados
 ```
 
-2) Rodar testes individuais (ordem sugerida):
+2) Compilar todo o projeto:
+```powershell
+javac -encoding UTF-8 -cp . dao/*.java model/*.java view/*.java util/*.java teste/*.java
+```
+
+3) Rodar testes individuais (ordem sugerida):
 
 ```powershell
-java -cp . teste.TestBuscar
-java -cp . teste.TestAlterar
-java -cp . teste.TestBiblioteca
+# Cria dados iniciais (cliente, jogos)
+java -cp . teste.SeedData
+
+# Testa CRUD de Jogos e índice de preço
 java -cp . teste.TestJogo
+
+# Testa CRUD de Bibliotecas e índice Cliente->Biblioteca
+java -cp . teste.TestBiblioteca
+
+# Testa CRUD de Compras
 java -cp . teste.TestCompra
+
+# Testa interativamente o índice de preços
 java -cp . teste.TestBuscarPreco
 ```
 
 Notas:
 - Os arquivos de dados ficam em `dados/<entidade>/<entidade>.db`. 
+- Os arquivos de índice ficam em `dados/<entidade>/<indice>.db`.
 - Mudanças no layout binário podem quebrar compatibilidade; o projeto inclui fallbacks em alguns `fromByteArray` para manter compatibilidade com registros antigos.
 
-## Executando a interface principal (view.Principal)
+## Executando a interface principal e testando os índices
 
-Após compilar o projeto, você pode iniciar a interface de console principal que agrega todos os menus (clientes, bibliotecas, jogos, compras):
+Após compilar o projeto, você pode iniciar a interface de console principal que agrega todos os menus:
 
 ```powershell
 # a partir da raiz do projeto
 java -cp . view.Principal
 ```
 
-O que aparece e o que fazer:
+### Tutorial Rápido para Testar os Índices
 
-- Menu principal (opções):
-	1 - Clientes
-	2 - Bibliotecas
-	3 - Jogos
-	4 - Compras
-	0 - Sair
+**1. Testando o Índice de Preços (Jogo)**
 
-- Como navegar:
-	- Digite o número da opção e pressione Enter.
-	- Em cada sub-menu use as opções mostradas (Buscar, Incluir, Alterar, Excluir, Listar). Normalmente 0 volta ao menu anterior.
+- No menu principal, escolha a opção **`5 - Busca por Preço (Índice)`**.
+- Você verá um menu com várias opções de busca baseadas em preço (exato, faixa, premium, etc.).
+- Use essas opções para verificar se os jogos são encontrados corretamente.
+- Para testar a persistência: adicione um novo jogo no menu `3 - Jogos`, feche e reabra a aplicação, e verifique se a busca por preço encontra o novo jogo.
 
-- Fluxo de uso recomendado (exemplo prático):
-	1) Clientes → Incluir: crie um cliente para obter um `clienteId` válido (necessário para associar bibliotecas e compras).
-	2) Jogos → Incluir: cadastre jogos que poderão ser adicionados a compras/bibliotecas.
-	3) Compras → Incluir: informe o `clienteId` do cliente criado e os dados da compra (o DAO valida o cliente).
-	4) Bibliotecas → Incluir: associe uma biblioteca a um `clienteId` se desejar.
+**2. Testando o Índice Cliente → Bibliotecas**
+
+- Primeiro, crie um cliente no menu `1 - Clientes` e anote o ID dele.
+- Em seguida, vá para o menu `2 - Bibliotecas` e inclua algumas bibliotecas, associando-as ao `clienteId` que você criou.
+- No menu de Bibliotecas, use a opção **`7 - Buscar por Cliente`** e informe o ID do cliente. A busca deve retornar apenas as bibliotecas associadas a ele.
+- Para testar a persistência: feche e reabra a aplicação e realize a busca por cliente novamente. O resultado deve ser o mesmo.
+- Se algo der errado, use a opção **`8 - Reconstruir Índice Cliente->Biblioteca`**.
+
+**3. Testando o Índice Biblioteca → Jogos**
+
+- No menu `2 - Bibliotecas`, escolha a opção **`6 - Gerenciar Jogos da Biblioteca`**.
+- Informe o ID de uma biblioteca existente.
+- Você entrará em um sub-menu. Use a opção **`1 - Adicionar Jogo`** e informe o ID de um jogo existente para criar a associação.
+- Use a opção **`2 - Listar Jogos`** para ver todos os jogos associados àquela biblioteca. A busca é feita pelo índice.
+- Para testar a persistência: feche e reabra a aplicação, volte a este menu e liste os jogos da biblioteca novamente. A associação deve permanecer.
+- Se algo der errado, use a opção **`4 - Reconstruir Índice Biblioteca->Jogos`**.
 
 - Dicas:
 	- Em operações de alteração, deixar o campo vazio (apertar Enter) normalmente mantém o valor atual.
