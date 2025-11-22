@@ -3,6 +3,7 @@ package model;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import util.RSAUtil;
 
 public class Cliente implements Registro{
     private int id;
@@ -46,7 +47,12 @@ public class Cliente implements Registro{
         dos.writeInt(this.id);
         dos.writeUTF(this.nome);
         dos.writeUTF(this.email);
-        dos.writeUTF(this.senha);
+        try {
+            String enc = RSAUtil.encryptString(this.senha == null ? "" : this.senha);
+            dos.writeUTF(enc);
+        } catch (Exception e) {
+            throw new IOException("Erro ao criptografar senha: " + e.getMessage());
+        }
         dos.writeLong(this.cadastro.toEpochDay());
         return baos.toByteArray();
     }
@@ -58,7 +64,12 @@ public class Cliente implements Registro{
         this.id = dis.readInt();
         this.nome = dis.readUTF();
         this.email = dis.readUTF();
-        this.senha = dis.readUTF();
+        try {
+            String enc = dis.readUTF();
+            this.senha = RSAUtil.decryptString(enc);
+        } catch (Exception e) {
+            throw new IOException("Erro ao descriptografar senha: " + e.getMessage());
+        }
         this.cadastro = LocalDate.ofEpochDay(dis.readLong());
     }
 
