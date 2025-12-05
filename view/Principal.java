@@ -18,6 +18,7 @@ public class Principal {
                 System.out.println("4 - Compras");
                 System.out.println("5 - Busca por Preço (Índice)");
                 System.out.println("6 - Pesquisar por padrão (KMP / BM)");
+                System.out.println("7 - Backup e Compressão");
                 System.out.println("0 - Sair");
 
                 System.out.print("\nOpção: ");
@@ -51,6 +52,10 @@ public class Principal {
                     case 6:
                         MenuPesquisaPadrao menuPesquisa = new MenuPesquisaPadrao(console);
                         menuPesquisa.menu();
+                        break;
+                    case 7:
+                        MenuBackup menuBackup = new MenuBackup(console);
+                        menuBackup.menu();
                         break;
                     case 0:
                         System.out.println("Saindo...");

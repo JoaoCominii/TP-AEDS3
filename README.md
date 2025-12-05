@@ -86,3 +86,7 @@ O sistema seguirá o padrão **MVC + DAO**, onde:
 ## TP - PARTE 4
 
 [Formulario e instruções do tp parte 4](TP-PARTE4.md)
+
+## TP - PARTE 5
+
+[Formulario e instruções do tp parte 5](TP-PARTE5.md)
